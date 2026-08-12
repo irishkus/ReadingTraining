@@ -2,17 +2,24 @@ import Foundation
 
 @MainActor
 final class WordMatchGameViewModel: ObservableObject {
+    enum RoundMode: Equatable {
+        case random
+        case alphabetical
+    }
+
     @Published private(set) var words: [WordMatchPair]
     @Published private(set) var pictures: [WordMatchPair]
     @Published private var pictureIDByWordID: [WordMatchPair.ID: WordMatchPair.ID] = [:]
     @Published private(set) var selectedWordID: WordMatchPair.ID?
     @Published private(set) var selectedPictureID: WordMatchPair.ID?
+    @Published private(set) var roundMode: RoundMode = .random
     @Published var isCelebrationPresented = false
 
     let allPairs: [WordMatchPair]
     private let roundSize: Int
 
     private var hasShownCelebration = false
+    private static let russianLocale = Locale(identifier: "ru_RU")
 
     init(
         pairs: [WordMatchPair] = WordMatchLibrary.defaultPool(),
@@ -23,8 +30,11 @@ final class WordMatchGameViewModel: ObservableObject {
         self.roundSize = max(1, roundSize)
 
         let initialPairs = Self.buildRound(from: pairs, roundSize: self.roundSize, shuffleSource: shuffleOnInit)
-        words = shuffleOnInit ? initialPairs.shuffled() : initialPairs
-        pictures = shuffleOnInit ? initialPairs.shuffled() : initialPairs
+        let initialWords = shuffleOnInit ? initialPairs.shuffled() : initialPairs
+        words = initialWords
+        pictures = shuffleOnInit
+            ? Self.shuffledPairs(from: initialPairs, avoiding: initialWords.map(\.id))
+            : initialPairs
     }
 
     var connections: [WordMatchConnection] {
@@ -48,6 +58,10 @@ final class WordMatchGameViewModel: ObservableObject {
 
     var correctConnectionsCount: Int {
         connections.filter(\.isCorrect).count
+    }
+
+    var isAlphabeticalRound: Bool {
+        roundMode == .alphabetical
     }
 
     func selectWord(_ wordID: WordMatchPair.ID) {
@@ -91,15 +105,22 @@ final class WordMatchGameViewModel: ObservableObject {
     }
 
     func startNewRound() {
-        pictureIDByWordID = [:]
-        selectedWordID = nil
-        selectedPictureID = nil
-        isCelebrationPresented = false
-        hasShownCelebration = false
+        resetRoundState()
+        roundMode = .random
 
         let nextPairs = Self.buildRound(from: allPairs, roundSize: roundSize, shuffleSource: true)
-        words = nextPairs.shuffled()
-        pictures = nextPairs.shuffled()
+        let nextWords = nextPairs.shuffled()
+        words = nextWords
+        pictures = Self.shuffledPairs(from: nextPairs, avoiding: nextWords.map(\.id))
+    }
+
+    func startAlphabetRound() {
+        resetRoundState()
+        roundMode = .alphabetical
+
+        let nextWords = Self.buildAlphabeticalRound(from: allPairs, roundSize: roundSize)
+        words = nextWords
+        pictures = Self.shuffledPairs(from: nextWords, avoiding: nextWords.map(\.id))
     }
 
     func dismissCelebration() {
@@ -156,6 +177,14 @@ final class WordMatchGameViewModel: ObservableObject {
         pictureIDByWordID.first(where: { $0.value == pictureID })?.key
     }
 
+    private func resetRoundState() {
+        pictureIDByWordID = [:]
+        selectedWordID = nil
+        selectedPictureID = nil
+        isCelebrationPresented = false
+        hasShownCelebration = false
+    }
+
     private func checkForCompletion() {
         guard !hasShownCelebration else {
             return
@@ -184,5 +213,56 @@ final class WordMatchGameViewModel: ObservableObject {
 
         let source = shuffleSource ? pairs.shuffled() : pairs
         return Array(source.prefix(min(roundSize, source.count)))
+    }
+
+    private static func buildAlphabeticalRound(
+        from pairs: [WordMatchPair],
+        roundSize: Int
+    ) -> [WordMatchPair] {
+        guard !pairs.isEmpty else {
+            return []
+        }
+
+        let sortedPairs = pairs.sorted { lhs, rhs in
+            let comparison = lhs.word.compare(
+                rhs.word,
+                options: [.caseInsensitive],
+                range: nil,
+                locale: russianLocale
+            )
+
+            if comparison == .orderedSame {
+                return lhs.id.uuidString < rhs.id.uuidString
+            }
+
+            return comparison == .orderedAscending
+        }
+
+        let limitedSize = min(roundSize, sortedPairs.count)
+        guard sortedPairs.count > limitedSize else {
+            return Array(sortedPairs.prefix(limitedSize))
+        }
+
+        let startIndex = Int.random(in: 0...(sortedPairs.count - limitedSize))
+        let endIndex = startIndex + limitedSize
+        return Array(sortedPairs[startIndex..<endIndex])
+    }
+
+    private static func shuffledPairs(
+        from pairs: [WordMatchPair],
+        avoiding referenceOrder: [WordMatchPair.ID]
+    ) -> [WordMatchPair] {
+        guard pairs.count > 1 else {
+            return pairs
+        }
+
+        for _ in 0..<12 {
+            let shuffled = pairs.shuffled()
+            if shuffled.map(\.id) != referenceOrder {
+                return shuffled
+            }
+        }
+
+        return Array(pairs.reversed())
     }
 }

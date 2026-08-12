@@ -161,21 +161,33 @@ struct WordsTrainerScreen: View {
 
             Spacer()
 
-            Button {
-                viewModel.startNewRound()
-            } label: {
-                Label("Новый набор", systemImage: "shuffle")
-                    .font(.system(size: compactHeight ? 15 : 16, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(red: 0.18, green: 0.48, blue: 0.78))
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(
-                        Capsule()
-                            .fill(.white.opacity(0.72))
+            HStack(spacing: 8) {
+                Button {
+                    viewModel.startAlphabetRound()
+                } label: {
+                    footerButtonLabel(
+                        title: "По алфавиту",
+                        systemImage: "textformat.abc",
+                        compactHeight: compactHeight,
+                        isActive: viewModel.isAlphabeticalRound
                     )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("words.action.alphabetical")
+
+                Button {
+                    viewModel.startNewRound()
+                } label: {
+                    footerButtonLabel(
+                        title: "Новый набор",
+                        systemImage: "shuffle",
+                        compactHeight: compactHeight,
+                        isActive: !viewModel.isAlphabeticalRound
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("words.action.restart")
             }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("words.action.restart")
         }
         .padding(.horizontal, 18)
         .padding(.vertical, compactHeight ? 12 : 14)
@@ -183,6 +195,27 @@ struct WordsTrainerScreen: View {
             RoundedRectangle(cornerRadius: 26, style: .continuous)
                 .fill(.white.opacity(0.76))
         )
+    }
+
+    private func footerButtonLabel(
+        title: String,
+        systemImage: String,
+        compactHeight: Bool,
+        isActive: Bool
+    ) -> some View {
+        Label(title, systemImage: systemImage)
+            .font(.system(size: compactHeight ? 14 : 15, weight: .bold, design: .rounded))
+            .foregroundStyle(
+                isActive
+                    ? Color(red: 0.18, green: 0.48, blue: 0.78)
+                    : Color(red: 0.28, green: 0.45, blue: 0.62)
+            )
+            .padding(.horizontal, compactHeight ? 12 : 14)
+            .padding(.vertical, 12)
+            .background(
+                Capsule()
+                    .fill(isActive ? .white.opacity(0.88) : .white.opacity(0.62))
+            )
     }
 
     private var celebrationSheet: some View {

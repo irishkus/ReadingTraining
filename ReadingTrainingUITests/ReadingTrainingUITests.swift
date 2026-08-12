@@ -1,6 +1,14 @@
 import XCTest
 
 final class ReadingTrainingUITests: XCTestCase {
+    private let russianAlphabeticalOrder = [
+        "БУЛКА",
+        "БУСЫ",
+        "ВЕДРО",
+        "КУКЛА",
+        "СУМКА"
+    ]
+
     override func setUpWithError() throws {
         continueAfterFailure = false
     }
@@ -77,5 +85,25 @@ final class ReadingTrainingUITests: XCTestCase {
         }
 
         XCTAssertTrue(app.staticTexts["words.celebration.title"].waitForExistence(timeout: 2))
+    }
+
+    func testAlphabeticalButtonSortsWordColumn() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("UITestSmallWordSet")
+        app.launch()
+
+        app.tabBars.buttons["Слова"].tap()
+
+        let alphabeticalButton = app.buttons["words.action.alphabetical"]
+        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
+
+        alphabeticalButton.tap()
+
+        let predicate = NSPredicate(format: "identifier BEGINSWITH %@", "words.word.")
+        let wordButtons = app.buttons.matching(predicate)
+        XCTAssertEqual(wordButtons.count, russianAlphabeticalOrder.count)
+
+        let visibleWords = wordButtons.allElementsBoundByIndex.map(\.label)
+        XCTAssertEqual(visibleWords, russianAlphabeticalOrder)
     }
 }
