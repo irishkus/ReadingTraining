@@ -92,6 +92,7 @@ struct WordsTrainerScreen: View {
                         )
                         .accessibilityIdentifier("words.word.\(pair.key)")
                         .accessibilityLabel(pair.word)
+                        .accessibilityValue(viewModel.cardState(forWordID: pair.id).accessibilityValue)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -125,6 +126,7 @@ struct WordsTrainerScreen: View {
                         )
                         .accessibilityIdentifier("words.picture.\(pair.key)")
                         .accessibilityLabel(pair.word)
+                        .accessibilityValue(viewModel.cardState(forPictureID: pair.id).accessibilityValue)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -166,6 +168,7 @@ struct WordsTrainerScreen: View {
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("words.action.alphabetical")
+            .accessibilityValue(viewModel.isAlphabeticalRound ? "active" : "inactive")
 
             Button {
                 viewModel.startNewRound()
@@ -178,6 +181,7 @@ struct WordsTrainerScreen: View {
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("words.action.restart")
+            .accessibilityValue(viewModel.isAlphabeticalRound ? "inactive" : "active")
         }
         .padding(.horizontal, 18)
         .padding(.vertical, compactHeight ? 12 : 14)
@@ -237,6 +241,7 @@ struct WordsTrainerScreen: View {
                     )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("words.celebration.playAgain")
         }
         .padding(24)
     }
@@ -251,8 +256,10 @@ private struct MatchWordCard: View {
         Text(word)
             .font(.system(size: compactHeight ? 26 : 30, weight: .black, design: .rounded))
             .foregroundStyle(Color(red: 0.17, green: 0.23, blue: 0.30))
-            .lineLimit(1)
-            .minimumScaleFactor(0.70)
+            .lineLimit(2)
+            .multilineTextAlignment(.center)
+            .minimumScaleFactor(0.52)
+            .allowsTightening(true)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.horizontal, 10)
             .background(cardShape.fill(state.fillColor))
@@ -398,6 +405,19 @@ private struct MatchPointPreferenceKey: PreferenceKey {
 }
 
 private extension WordMatchCardState {
+    var accessibilityValue: String {
+        switch self {
+        case .idle:
+            return "idle"
+        case .selected:
+            return "selected"
+        case .correct:
+            return "correct"
+        case .incorrect:
+            return "incorrect"
+        }
+    }
+
     var fillColor: Color {
         switch self {
         case .idle:

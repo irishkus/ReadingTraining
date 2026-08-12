@@ -106,4 +106,80 @@ final class ReadingTrainingUITests: XCTestCase {
         let visibleWords = wordButtons.allElementsBoundByIndex.map(\.label)
         XCTAssertEqual(visibleWords, russianAlphabeticalOrder)
     }
+
+    func testAlphabeticalModeStaysActiveAfterNewRound() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("UITestSmallWordSet")
+        app.launch()
+
+        app.tabBars.buttons["Слова"].tap()
+
+        let alphabeticalButton = app.buttons["words.action.alphabetical"]
+        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
+
+        alphabeticalButton.tap()
+        XCTAssertEqual(alphabeticalButton.value as? String, "active")
+
+        app.buttons["words.action.restart"].tap()
+
+        XCTAssertEqual(alphabeticalButton.value as? String, "active")
+
+        let predicate = NSPredicate(format: "identifier BEGINSWITH %@", "words.word.")
+        let wordButtons = app.buttons.matching(predicate)
+        let visibleWords = wordButtons.allElementsBoundByIndex.map(\.label)
+        XCTAssertEqual(visibleWords, russianAlphabeticalOrder)
+    }
+
+    func testAlphabeticalModeStaysActiveAfterCelebrationPlayAgain() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("UITestSmallWordSet")
+        app.launch()
+
+        app.tabBars.buttons["Слова"].tap()
+
+        let alphabeticalButton = app.buttons["words.action.alphabetical"]
+        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
+        alphabeticalButton.tap()
+
+        let pairs = ["bread", "beads", "bucket", "doll", "bag"]
+        for key in pairs {
+            app.buttons["words.word.\(key)"].tap()
+            app.buttons["words.picture.\(key)"].tap()
+        }
+
+        XCTAssertTrue(app.staticTexts["words.celebration.title"].waitForExistence(timeout: 2))
+
+        app.buttons["words.celebration.playAgain"].tap()
+
+        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
+        XCTAssertEqual(alphabeticalButton.value as? String, "active")
+
+        let predicate = NSPredicate(format: "identifier BEGINSWITH %@", "words.word.")
+        let wordButtons = app.buttons.matching(predicate)
+        let visibleWords = wordButtons.allElementsBoundByIndex.map(\.label)
+        XCTAssertEqual(visibleWords, russianAlphabeticalOrder)
+    }
+
+    func testRepeatedTapOnConnectedPictureRemovesConnection() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("UITestSmallWordSet")
+        app.launch()
+
+        app.tabBars.buttons["Слова"].tap()
+
+        let wordButton = app.buttons["words.word.beads"]
+        let pictureButton = app.buttons["words.picture.bucket"]
+
+        XCTAssertTrue(wordButton.waitForExistence(timeout: 2))
+        XCTAssertTrue(pictureButton.exists)
+
+        wordButton.tap()
+        pictureButton.tap()
+        XCTAssertEqual(wordButton.value as? String, "incorrect")
+        XCTAssertEqual(pictureButton.value as? String, "incorrect")
+
+        pictureButton.tap()
+        XCTAssertEqual(wordButton.value as? String, "idle")
+        XCTAssertEqual(pictureButton.value as? String, "selected")
+    }
 }

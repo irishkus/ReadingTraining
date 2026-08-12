@@ -114,4 +114,63 @@ final class WordMatchGameViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isCelebrationPresented)
         XCTAssertTrue(viewModel.isAlphabeticalRound)
     }
+
+    func testToggleAlphabeticalRoundSwitchesModes() {
+        let viewModel = WordMatchGameViewModel(shuffleOnInit: false)
+
+        XCTAssertFalse(viewModel.isAlphabeticalRound)
+
+        viewModel.toggleAlphabeticalRound()
+        XCTAssertTrue(viewModel.isAlphabeticalRound)
+
+        viewModel.toggleAlphabeticalRound()
+        XCTAssertFalse(viewModel.isAlphabeticalRound)
+    }
+
+    func testNewRoundKeepsAlphabeticalModeActive() {
+        let viewModel = WordMatchGameViewModel(shuffleOnInit: false)
+
+        viewModel.startAlphabetRound()
+        let firstAlphabeticalWords = viewModel.words.map(\.word)
+
+        viewModel.startNewRound()
+
+        XCTAssertTrue(viewModel.isAlphabeticalRound)
+        XCTAssertEqual(viewModel.words.map(\.word), viewModel.words.map(\.word).sorted())
+        XCTAssertEqual(viewModel.words.count, firstAlphabeticalWords.count)
+    }
+
+    func testNewRoundAfterCelebrationKeepsAlphabeticalModeActive() {
+        let viewModel = WordMatchGameViewModel(shuffleOnInit: false)
+
+        viewModel.startAlphabetRound()
+
+        for pair in viewModel.words {
+            viewModel.selectWord(pair.id)
+            viewModel.selectPicture(pair.id)
+        }
+
+        XCTAssertTrue(viewModel.isCelebrationPresented)
+        XCTAssertTrue(viewModel.isAlphabeticalRound)
+
+        viewModel.startNewRound()
+
+        XCTAssertFalse(viewModel.isCelebrationPresented)
+        XCTAssertTrue(viewModel.isAlphabeticalRound)
+        XCTAssertEqual(viewModel.words.map(\.word), viewModel.words.map(\.word).sorted())
+    }
+
+    func testSelectingConnectedPictureRemovesLineAndSelectsPictureAgain() {
+        let viewModel = WordMatchGameViewModel(shuffleOnInit: false)
+        let word = viewModel.words[0]
+        let picture = viewModel.pictures[1]
+
+        viewModel.selectWord(word.id)
+        viewModel.selectPicture(picture.id)
+        viewModel.selectPicture(picture.id)
+
+        XCTAssertTrue(viewModel.connections.isEmpty)
+        XCTAssertNil(viewModel.selectedWordID)
+        XCTAssertEqual(viewModel.selectedPictureID, picture.id)
+    }
 }
