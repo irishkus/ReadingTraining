@@ -106,21 +106,27 @@ final class WordMatchGameViewModel: ObservableObject {
 
     func startNewRound() {
         resetRoundState()
-        roundMode = .random
-
-        let nextPairs = Self.buildRound(from: allPairs, roundSize: roundSize, shuffleSource: true)
-        let nextWords = nextPairs.shuffled()
-        words = nextWords
-        pictures = Self.shuffledPairs(from: nextPairs, avoiding: nextWords.map(\.id))
+        switch roundMode {
+        case .random:
+            let nextPairs = Self.buildRound(from: allPairs, roundSize: roundSize, shuffleSource: true)
+            let nextWords = nextPairs.shuffled()
+            words = nextWords
+            pictures = Self.shuffledPairs(from: nextPairs, avoiding: nextWords.map(\.id))
+        case .alphabetical:
+            let nextWords = Self.buildAlphabeticalRound(from: allPairs, roundSize: roundSize)
+            words = nextWords
+            pictures = Self.shuffledPairs(from: nextWords, avoiding: nextWords.map(\.id))
+        }
     }
 
     func startAlphabetRound() {
-        resetRoundState()
         roundMode = .alphabetical
+        startNewRound()
+    }
 
-        let nextWords = Self.buildAlphabeticalRound(from: allPairs, roundSize: roundSize)
-        words = nextWords
-        pictures = Self.shuffledPairs(from: nextWords, avoiding: nextWords.map(\.id))
+    func toggleAlphabeticalRound() {
+        roundMode = isAlphabeticalRound ? .random : .alphabetical
+        startNewRound()
     }
 
     func dismissCelebration() {

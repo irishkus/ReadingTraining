@@ -62,80 +62,80 @@ struct WordsTrainerScreen: View {
             let cardHeight = min(92, max(62, (boardProxy.size.height - (rowSpacing * 4)) / 5))
             let imageSize = compactHeight ? cardHeight * 0.82 : cardHeight * 0.88
 
-            ZStack {
-                HStack(alignment: .top, spacing: compactHeight ? 16 : 20) {
-                    VStack(spacing: rowSpacing) {
-                        ForEach(viewModel.words) { pair in
-                            Button {
-                                viewModel.selectWord(pair.id)
-                            } label: {
-                                MatchWordCard(
-                                    word: pair.word,
-                                    state: viewModel.cardState(forWordID: pair.id),
-                                    compactHeight: compactHeight
+            HStack(alignment: .top, spacing: compactHeight ? 16 : 20) {
+                VStack(spacing: rowSpacing) {
+                    ForEach(viewModel.words) { pair in
+                        Button {
+                            viewModel.selectWord(pair.id)
+                        } label: {
+                            MatchWordCard(
+                                word: pair.word,
+                                state: viewModel.cardState(forWordID: pair.id),
+                                compactHeight: compactHeight
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: cardHeight)
+                        .background(
+                            GeometryReader { geometry in
+                                Color.clear.preference(
+                                    key: MatchPointPreferenceKey.self,
+                                    value: [
+                                        "word-\(pair.id.uuidString)": CGPoint(
+                                            x: geometry.frame(in: .named("matchBoard")).maxX - 24,
+                                            y: geometry.frame(in: .named("matchBoard")).midY
+                                        )
+                                    ]
                                 )
                             }
-                            .buttonStyle(.plain)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: cardHeight)
-                            .background(
-                                GeometryReader { geometry in
-                                    Color.clear.preference(
-                                        key: MatchPointPreferenceKey.self,
-                                        value: [
-                                            "word-\(pair.id.uuidString)": CGPoint(
-                                                x: geometry.frame(in: .named("matchBoard")).maxX - 24,
-                                                y: geometry.frame(in: .named("matchBoard")).midY
-                                            )
-                                        ]
-                                    )
-                                }
-                            )
-                            .accessibilityIdentifier("words.word.\(pair.key)")
-                            .accessibilityLabel(pair.word)
-                        }
+                        )
+                        .accessibilityIdentifier("words.word.\(pair.key)")
+                        .accessibilityLabel(pair.word)
                     }
-                    .frame(maxWidth: .infinity)
-
-                    VStack(spacing: rowSpacing) {
-                        ForEach(viewModel.pictures) { pair in
-                            Button {
-                                viewModel.selectPicture(pair.id)
-                            } label: {
-                                MatchPictureCard(
-                                    illustration: pair.illustration,
-                                    state: viewModel.cardState(forPictureID: pair.id),
-                                    imageSize: imageSize
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: cardHeight)
-                            .background(
-                                GeometryReader { geometry in
-                                    Color.clear.preference(
-                                        key: MatchPointPreferenceKey.self,
-                                        value: [
-                                            "picture-\(pair.id.uuidString)": CGPoint(
-                                                x: geometry.frame(in: .named("matchBoard")).minX + 12,
-                                                y: geometry.frame(in: .named("matchBoard")).midY
-                                            )
-                                        ]
-                                    )
-                                }
-                            )
-                            .accessibilityIdentifier("words.picture.\(pair.key)")
-                            .accessibilityLabel(pair.word)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
                 }
+                .frame(maxWidth: .infinity)
 
+                VStack(spacing: rowSpacing) {
+                    ForEach(viewModel.pictures) { pair in
+                        Button {
+                            viewModel.selectPicture(pair.id)
+                        } label: {
+                            MatchPictureCard(
+                                illustration: pair.illustration,
+                                state: viewModel.cardState(forPictureID: pair.id),
+                                imageSize: imageSize
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: cardHeight)
+                        .background(
+                            GeometryReader { geometry in
+                                Color.clear.preference(
+                                    key: MatchPointPreferenceKey.self,
+                                    value: [
+                                        "picture-\(pair.id.uuidString)": CGPoint(
+                                            x: geometry.frame(in: .named("matchBoard")).minX + 12,
+                                            y: geometry.frame(in: .named("matchBoard")).midY
+                                        )
+                                    ]
+                                )
+                            }
+                        )
+                        .accessibilityIdentifier("words.picture.\(pair.key)")
+                        .accessibilityLabel(pair.word)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .overlay {
                 ConnectionLayerView(
                     connections: viewModel.connections,
                     points: connectionPoints,
                     compactHeight: compactHeight
                 )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .zIndex(1)
             }
             .padding(.horizontal, compactHeight ? 10 : 12)
@@ -154,43 +154,34 @@ struct WordsTrainerScreen: View {
     }
 
     private func footer(compactHeight: Bool) -> some View {
-        HStack(spacing: 12) {
-            Text("Верно: \(viewModel.correctConnectionsCount) из \(viewModel.totalCount)")
-                .font(.system(size: compactHeight ? 15 : 16, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary.opacity(0.72))
-
-            Spacer()
-
-            HStack(spacing: 8) {
-                Button {
-                    viewModel.startAlphabetRound()
-                } label: {
-                    footerButtonLabel(
-                        title: "По алфавиту",
-                        systemImage: "textformat.abc",
-                        compactHeight: compactHeight,
-                        isActive: viewModel.isAlphabeticalRound
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("words.action.alphabetical")
-
-                Button {
-                    viewModel.startNewRound()
-                } label: {
-                    footerButtonLabel(
-                        title: "Новый набор",
-                        systemImage: "shuffle",
-                        compactHeight: compactHeight,
-                        isActive: !viewModel.isAlphabeticalRound
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("words.action.restart")
+        HStack(spacing: 8) {
+            Button {
+                viewModel.toggleAlphabeticalRound()
+            } label: {
+                footerButtonLabel(
+                    title: "По алфавиту",
+                    compactHeight: compactHeight,
+                    isActive: viewModel.isAlphabeticalRound
+                )
             }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("words.action.alphabetical")
+
+            Button {
+                viewModel.startNewRound()
+            } label: {
+                footerButtonLabel(
+                    title: "Новый набор",
+                    compactHeight: compactHeight,
+                    isActive: !viewModel.isAlphabeticalRound
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("words.action.restart")
         }
         .padding(.horizontal, 18)
         .padding(.vertical, compactHeight ? 12 : 14)
+        .frame(height: compactHeight ? 72 : 76)
         .background(
             RoundedRectangle(cornerRadius: 26, style: .continuous)
                 .fill(.white.opacity(0.76))
@@ -199,17 +190,17 @@ struct WordsTrainerScreen: View {
 
     private func footerButtonLabel(
         title: String,
-        systemImage: String,
         compactHeight: Bool,
         isActive: Bool
     ) -> some View {
-        Label(title, systemImage: systemImage)
+        Text(title)
             .font(.system(size: compactHeight ? 14 : 15, weight: .bold, design: .rounded))
             .foregroundStyle(
                 isActive
                     ? Color(red: 0.18, green: 0.48, blue: 0.78)
                     : Color(red: 0.28, green: 0.45, blue: 0.62)
             )
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, compactHeight ? 12 : 14)
             .padding(.vertical, 12)
             .background(
