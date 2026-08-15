@@ -125,7 +125,7 @@ struct LetterPickerSheet: View {
                 }
             }
         }
-        .onChange(of: query) { _, newValue in
+        .onChange(of: query) { newValue in
             let filteredValue = String(newValue.filter(\.isLetter).prefix(1)).uppercased()
             if filteredValue != newValue {
                 query = filteredValue
