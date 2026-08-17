@@ -12,10 +12,12 @@ final class WordMatchGameViewModel: ObservableObject {
     @Published private var pictureIDByWordID: [WordMatchPair.ID: WordMatchPair.ID] = [:]
     @Published private(set) var selectedWordID: WordMatchPair.ID?
     @Published private(set) var selectedPictureID: WordMatchPair.ID?
-    @Published private(set) var roundMode: RoundMode = .random
+    @Published private(set) var roundMode: RoundMode
+    @Published private(set) var errorCount = 0
     @Published var isCelebrationPresented = false
 
     let allPairs: [WordMatchPair]
+    let maximumMistakeCount: Int
     private let roundSize: Int
 
     private var hasShownCelebration = false
@@ -24,17 +26,34 @@ final class WordMatchGameViewModel: ObservableObject {
     init(
         pairs: [WordMatchPair] = WordMatchLibrary.defaultPool(),
         roundSize: Int = 5,
+        maximumMistakeCount: Int = 7,
+        initialRoundMode: RoundMode = .alphabetical,
         shuffleOnInit: Bool = true
     ) {
         allPairs = pairs
         self.roundSize = max(1, roundSize)
+        self.maximumMistakeCount = max(0, maximumMistakeCount)
+        roundMode = initialRoundMode
 
-        let initialPairs = Self.buildRound(from: pairs, roundSize: self.roundSize, shuffleSource: shuffleOnInit)
-        let initialWords = shuffleOnInit ? initialPairs.shuffled() : initialPairs
-        words = initialWords
-        pictures = shuffleOnInit
-            ? Self.shuffledPairs(from: initialPairs, avoiding: initialWords.map(\.id))
-            : initialPairs
+        switch initialRoundMode {
+        case .random:
+            let initialPairs = Self.buildRound(from: pairs, roundSize: self.roundSize, shuffleSource: shuffleOnInit)
+            let initialWords = shuffleOnInit ? initialPairs.shuffled() : initialPairs
+            words = initialWords
+            pictures = shuffleOnInit
+                ? Self.shuffledPairs(from: initialPairs, avoiding: initialWords.map(\.id))
+                : initialPairs
+        case .alphabetical:
+            let initialWords = Self.buildAlphabeticalRound(
+                from: pairs,
+                roundSize: self.roundSize,
+                chooseRandomWindow: shuffleOnInit
+            )
+            words = initialWords
+            pictures = shuffleOnInit
+                ? Self.shuffledPairs(from: initialWords, avoiding: initialWords.map(\.id))
+                : initialWords
+        }
     }
 
     var connections: [WordMatchConnection] {
@@ -124,9 +143,17 @@ final class WordMatchGameViewModel: ObservableObject {
         startNewRound()
     }
 
-    func toggleAlphabeticalRound() {
-        roundMode = isAlphabeticalRound ? .random : .alphabetical
+    func startRandomRound() {
+        roundMode = .random
         startNewRound()
+    }
+
+    func toggleAlphabeticalRound() {
+        if isAlphabeticalRound {
+            startRandomRound()
+        } else {
+            startAlphabetRound()
+        }
     }
 
     func dismissCelebration() {
@@ -158,12 +185,26 @@ final class WordMatchGameViewModel: ObservableObject {
     }
 
     private func makeConnection(wordID: WordMatchPair.ID, pictureID: WordMatchPair.ID) {
+        let isCorrect = wordID == pictureID
         removeConnection(forWordID: wordID)
         removeConnection(forPictureID: pictureID)
         pictureIDByWordID[wordID] = pictureID
         selectedWordID = nil
         selectedPictureID = nil
         isCelebrationPresented = false
+
+        if !isCorrect {
+            let nextErrorCount = errorCount + 1
+
+            if nextErrorCount >= maximumMistakeCount {
+                startNewRound()
+            } else {
+                errorCount = nextErrorCount
+            }
+
+            return
+        }
+
         checkForCompletion()
     }
 
@@ -187,6 +228,7 @@ final class WordMatchGameViewModel: ObservableObject {
         pictureIDByWordID = [:]
         selectedWordID = nil
         selectedPictureID = nil
+        errorCount = 0
         isCelebrationPresented = false
         hasShownCelebration = false
     }
@@ -223,7 +265,8 @@ final class WordMatchGameViewModel: ObservableObject {
 
     private static func buildAlphabeticalRound(
         from pairs: [WordMatchPair],
-        roundSize: Int
+        roundSize: Int,
+        chooseRandomWindow: Bool = true
     ) -> [WordMatchPair] {
         guard !pairs.isEmpty else {
             return []
@@ -246,6 +289,10 @@ final class WordMatchGameViewModel: ObservableObject {
 
         let limitedSize = min(roundSize, sortedPairs.count)
         guard sortedPairs.count > limitedSize else {
+            return Array(sortedPairs.prefix(limitedSize))
+        }
+
+        guard chooseRandomWindow else {
             return Array(sortedPairs.prefix(limitedSize))
         }
 

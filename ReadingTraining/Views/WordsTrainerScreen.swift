@@ -4,6 +4,8 @@ import UIKit
 struct WordsTrainerScreen: View {
     @StateObject private var viewModel = WordMatchGameViewModel()
     @State private var connectionPoints: [String: CGPoint] = [:]
+    @State private var isParentGatePresented = false
+    @State private var parentGateChallenge = ParentGateChallenge.random()
 
     var body: some View {
         GeometryReader { proxy in
@@ -45,6 +47,15 @@ struct WordsTrainerScreen: View {
             Text("Повторное нажатие на карточку убирает линию.")
                 .font(.system(size: compactHeight ? 13 : 14, weight: .semibold, design: .rounded))
                 .foregroundStyle(.primary.opacity(0.52))
+
+            Text("Ошибки: \(viewModel.errorCount) из \(viewModel.maximumMistakeCount)")
+                .font(.system(size: compactHeight ? 13 : 14, weight: .bold, design: .rounded))
+                .foregroundStyle(
+                    viewModel.errorCount == 0
+                        ? .primary.opacity(0.58)
+                        : Color(red: 0.78, green: 0.30, blue: 0.28)
+                )
+                .accessibilityIdentifier("words.errorCounter")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 18)
@@ -158,7 +169,7 @@ struct WordsTrainerScreen: View {
     private func footer(compactHeight: Bool) -> some View {
         HStack(spacing: 8) {
             Button {
-                viewModel.toggleAlphabeticalRound()
+                handleAlphabeticalButtonTap()
             } label: {
                 footerButtonLabel(
                     title: "По алфавиту",
@@ -169,6 +180,13 @@ struct WordsTrainerScreen: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("words.action.alphabetical")
             .accessibilityValue(viewModel.isAlphabeticalRound ? "active" : "inactive")
+            .sheet(isPresented: $isParentGatePresented) {
+                ParentGateSheet(challenge: parentGateChallenge) {
+                    viewModel.startRandomRound()
+                }
+                .presentationDetents([.height(360)])
+                .presentationDragIndicator(.visible)
+            }
 
             Button {
                 viewModel.startNewRound()
@@ -213,6 +231,16 @@ struct WordsTrainerScreen: View {
             )
     }
 
+    private func handleAlphabeticalButtonTap() {
+        if viewModel.isAlphabeticalRound {
+            parentGateChallenge = ParentGateChallenge.random()
+            isParentGatePresented = true
+            return
+        }
+
+        viewModel.startAlphabetRound()
+    }
+
     private var celebrationSheet: some View {
         VStack(spacing: 18) {
             Image(systemName: "star.circle.fill")
@@ -244,6 +272,117 @@ struct WordsTrainerScreen: View {
             .accessibilityIdentifier("words.celebration.playAgain")
         }
         .padding(24)
+    }
+}
+
+private struct ParentGateChallenge {
+    let radicand: Int
+    let root: Int
+
+    var expression: String {
+        "√\(radicand)"
+    }
+
+    var answer: Int {
+        root
+    }
+
+    static func random() -> ParentGateChallenge {
+        let root = Int.random(in: 2...10)
+        return ParentGateChallenge(radicand: root * root, root: root)
+    }
+}
+
+private struct ParentGateSheet: View {
+    let challenge: ParentGateChallenge
+    let onSuccess: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var answer = ""
+    @State private var errorMessage: String?
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 18) {
+                Text("Проверка для родителя")
+                    .font(.system(size: 28, weight: .black, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("words.parentGate.title")
+
+                Text("Чтобы убрать режим \"По алфавиту\",\nвведите корень из числа.")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.primary.opacity(0.72))
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+
+                Text(challenge.expression)
+                    .font(.system(size: 44, weight: .black, design: .rounded))
+                    .accessibilityIdentifier("words.parentGate.challenge")
+
+                TextField("Ответ", text: $answer)
+                    .keyboardType(.numberPad)
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .fill(Color(.systemBackground))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(Color(red: 0.18, green: 0.48, blue: 0.78).opacity(0.22), lineWidth: 1)
+                    )
+                    .accessibilityIdentifier("words.parentGate.answer")
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color(red: 0.78, green: 0.30, blue: 0.28))
+                }
+
+                Button {
+                    submit()
+                } label: {
+                    Text("Проверить")
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .background(
+                            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                .fill(Color(red: 0.18, green: 0.48, blue: 0.78))
+                        )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("words.parentGate.submit")
+
+                Spacer(minLength: 0)
+            }
+            .padding(24)
+            .background(Color(.systemGroupedBackground))
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Отмена") {
+                        dismiss()
+                    }
+                    .accessibilityIdentifier("words.parentGate.cancel")
+                }
+            }
+        }
+    }
+
+    private func submit() {
+        guard Int(answer.trimmingCharacters(in: .whitespacesAndNewlines)) == challenge.answer else {
+            errorMessage = "Неверный ответ. Попробуйте еще раз."
+            answer = ""
+            return
+        }
+
+        onSuccess()
+        dismiss()
     }
 }
 

@@ -96,8 +96,7 @@ final class ReadingTrainingUITests: XCTestCase {
 
         let alphabeticalButton = app.buttons["words.action.alphabetical"]
         XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
-
-        alphabeticalButton.tap()
+        XCTAssertEqual(alphabeticalButton.value as? String, "active")
 
         let predicate = NSPredicate(format: "identifier BEGINSWITH %@", "words.word.")
         let wordButtons = app.buttons.matching(predicate)
@@ -116,8 +115,6 @@ final class ReadingTrainingUITests: XCTestCase {
 
         let alphabeticalButton = app.buttons["words.action.alphabetical"]
         XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
-
-        alphabeticalButton.tap()
         XCTAssertEqual(alphabeticalButton.value as? String, "active")
 
         app.buttons["words.action.restart"].tap()
@@ -139,7 +136,6 @@ final class ReadingTrainingUITests: XCTestCase {
 
         let alphabeticalButton = app.buttons["words.action.alphabetical"]
         XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
-        alphabeticalButton.tap()
 
         let pairs = ["bread", "beads", "bucket", "doll", "bag"]
         for key in pairs {
@@ -181,5 +177,84 @@ final class ReadingTrainingUITests: XCTestCase {
         pictureButton.tap()
         XCTAssertEqual(wordButton.value as? String, "idle")
         XCTAssertEqual(pictureButton.value as? String, "selected")
+    }
+
+    func testErrorCounterResetsAfterSeventhMistake() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("UITestSmallWordSet")
+        app.launch()
+
+        app.tabBars.buttons["Слова"].tap()
+
+        let counter = app.staticTexts["words.errorCounter"]
+        XCTAssertTrue(counter.waitForExistence(timeout: 2))
+        XCTAssertEqual(counter.label, "Ошибки: 0 из 7")
+
+        let wordButton = app.buttons["words.word.beads"]
+        let pictureButton = app.buttons["words.picture.bucket"]
+
+        XCTAssertTrue(wordButton.waitForExistence(timeout: 2))
+        XCTAssertTrue(pictureButton.exists)
+
+        for attempt in 1..<7 {
+            wordButton.tap()
+            pictureButton.tap()
+            waitForLabel("Ошибки: \(attempt) из 7", element: counter)
+        }
+
+        wordButton.tap()
+        pictureButton.tap()
+
+        waitForLabel("Ошибки: 0 из 7", element: counter)
+    }
+
+    func testDisablingAlphabeticalModeRequiresParentGate() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("UITestSmallWordSet")
+        app.launch()
+
+        app.tabBars.buttons["Слова"].tap()
+
+        let alphabeticalButton = app.buttons["words.action.alphabetical"]
+        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
+        XCTAssertEqual(alphabeticalButton.value as? String, "active")
+
+        alphabeticalButton.tap()
+
+        let title = app.staticTexts["words.parentGate.title"]
+        XCTAssertTrue(title.waitForExistence(timeout: 2))
+
+        let challenge = app.staticTexts["words.parentGate.challenge"].label
+        let answer = squareRootFromChallenge(challenge)
+
+        let answerField = app.textFields["words.parentGate.answer"]
+        XCTAssertTrue(answerField.exists)
+        answerField.tap()
+        answerField.typeText(String(answer))
+
+        app.buttons["words.parentGate.submit"].tap()
+
+        waitForValue("inactive", element: alphabeticalButton)
+    }
+
+    private func waitForLabel(_ label: String, element: XCUIElement) {
+        let predicate = NSPredicate(format: "label == %@", label)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
+        XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: 2), .completed)
+    }
+
+    private func waitForValue(_ value: String, element: XCUIElement) {
+        let predicate = NSPredicate(format: "value == %@", value)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
+        XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: 2), .completed)
+    }
+
+    private func squareRootFromChallenge(_ challenge: String) -> Int {
+        let radicand = challenge
+            .components(separatedBy: CharacterSet.decimalDigits.inverted)
+            .joined()
+
+        let value = Int(radicand) ?? 0
+        return Int(Double(value).squareRoot())
     }
 }

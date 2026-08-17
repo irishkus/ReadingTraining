@@ -9,6 +9,8 @@ final class WordMatchGameViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.words.count, 5)
         XCTAssertEqual(viewModel.pictures.count, 5)
         XCTAssertEqual(viewModel.totalCount, 5)
+        XCTAssertTrue(viewModel.isAlphabeticalRound)
+        XCTAssertEqual(viewModel.words.map(\.word), viewModel.words.map(\.word).sorted())
     }
 
     func testCorrectMatchCreatesGreenConnection() {
@@ -20,6 +22,7 @@ final class WordMatchGameViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.connections.count, 1)
         XCTAssertTrue(viewModel.connections[0].isCorrect)
+        XCTAssertEqual(viewModel.errorCount, 0)
         XCTAssertEqual(viewModel.cardState(forWordID: pair.id), .correct)
         XCTAssertEqual(viewModel.cardState(forPictureID: pair.id), .correct)
     }
@@ -34,6 +37,7 @@ final class WordMatchGameViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.connections.count, 1)
         XCTAssertFalse(viewModel.connections[0].isCorrect)
+        XCTAssertEqual(viewModel.errorCount, 1)
         XCTAssertEqual(viewModel.cardState(forWordID: word.id), .incorrect)
         XCTAssertEqual(viewModel.cardState(forPictureID: picture.id), .incorrect)
     }
@@ -73,6 +77,7 @@ final class WordMatchGameViewModelTests: XCTestCase {
         viewModel.startNewRound()
 
         XCTAssertTrue(viewModel.connections.isEmpty)
+        XCTAssertEqual(viewModel.errorCount, 0)
         XCTAssertNil(viewModel.selectedWordID)
         XCTAssertNil(viewModel.selectedPictureID)
         XCTAssertFalse(viewModel.isCelebrationPresented)
@@ -118,12 +123,20 @@ final class WordMatchGameViewModelTests: XCTestCase {
     func testToggleAlphabeticalRoundSwitchesModes() {
         let viewModel = WordMatchGameViewModel(shuffleOnInit: false)
 
+        XCTAssertTrue(viewModel.isAlphabeticalRound)
+
+        viewModel.toggleAlphabeticalRound()
         XCTAssertFalse(viewModel.isAlphabeticalRound)
 
         viewModel.toggleAlphabeticalRound()
         XCTAssertTrue(viewModel.isAlphabeticalRound)
+    }
 
-        viewModel.toggleAlphabeticalRound()
+    func testStartRandomRoundDisablesAlphabeticalMode() {
+        let viewModel = WordMatchGameViewModel(shuffleOnInit: false)
+
+        viewModel.startRandomRound()
+
         XCTAssertFalse(viewModel.isAlphabeticalRound)
     }
 
@@ -170,7 +183,43 @@ final class WordMatchGameViewModelTests: XCTestCase {
         viewModel.selectPicture(picture.id)
 
         XCTAssertTrue(viewModel.connections.isEmpty)
+        XCTAssertEqual(viewModel.errorCount, 1)
         XCTAssertNil(viewModel.selectedWordID)
         XCTAssertEqual(viewModel.selectedPictureID, picture.id)
+    }
+
+    func testSeventhErrorStartsNewRoundAndResetsCounter() {
+        let viewModel = WordMatchGameViewModel(shuffleOnInit: false)
+        let word = viewModel.words[0]
+        let picture = viewModel.pictures[1]
+
+        for _ in 1...viewModel.maximumMistakeCount {
+            viewModel.selectWord(word.id)
+            viewModel.selectPicture(picture.id)
+        }
+
+        XCTAssertEqual(viewModel.errorCount, 0)
+        XCTAssertTrue(viewModel.connections.isEmpty)
+        XCTAssertNil(viewModel.selectedWordID)
+        XCTAssertNil(viewModel.selectedPictureID)
+        XCTAssertFalse(viewModel.isCelebrationPresented)
+    }
+
+    func testSeventhErrorKeepsAlphabeticalModeActive() {
+        let viewModel = WordMatchGameViewModel(shuffleOnInit: false)
+
+        viewModel.startAlphabetRound()
+
+        let word = viewModel.words[0]
+        let picture = viewModel.pictures.first(where: { $0.id != word.id })!
+
+        for _ in 1...viewModel.maximumMistakeCount {
+            viewModel.selectWord(word.id)
+            viewModel.selectPicture(picture.id)
+        }
+
+        XCTAssertTrue(viewModel.isAlphabeticalRound)
+        XCTAssertEqual(viewModel.errorCount, 0)
+        XCTAssertEqual(viewModel.words.map(\.word), viewModel.words.map(\.word).sorted())
     }
 }
