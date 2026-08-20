@@ -29,8 +29,9 @@ struct WordsTrainerScreen: View {
         }
         .sheet(isPresented: $viewModel.isCelebrationPresented, onDismiss: viewModel.dismissCelebration) {
             celebrationSheet
-                .presentationDetents([.height(280)])
+                .presentationDetents([.height(320)])
                 .presentationDragIndicator(.visible)
+                .celebrationSheetCorners()
         }
     }
 
@@ -432,7 +433,7 @@ private struct MatchPictureCard: View {
     }
 }
 
-private struct WordIllustrationImage: View {
+struct WordIllustrationImage: View {
     let illustration: WordIllustration
     let imageSize: CGFloat
 
@@ -465,7 +466,7 @@ private struct WordIllustrationImage: View {
 }
 
 @MainActor
-private final class WordImageStore {
+final class WordImageStore {
     static let shared = WordImageStore()
 
     private var cache: [String: UIImage] = [:]

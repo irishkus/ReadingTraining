@@ -237,6 +237,22 @@ final class ReadingTrainingUITests: XCTestCase {
         waitForValue("inactive", element: alphabeticalButton)
     }
 
+    func testReadAloudTabShowsCelebrationAfterRecognizedWord() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["UITestSmallWordSet", "UITestReadAloudAutoSuccess"]
+        app.launch()
+
+        app.tabBars.buttons["Прочитай"].tap()
+
+        let box = app.buttons["read.box.beads"]
+        XCTAssertTrue(box.waitForExistence(timeout: 2))
+
+        box.tap()
+
+        XCTAssertTrue(app.staticTexts["read.celebration.title"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["read.celebration.continue"].exists)
+    }
+
     private func waitForLabel(_ label: String, element: XCUIElement) {
         let predicate = NSPredicate(format: "label == %@", label)
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)

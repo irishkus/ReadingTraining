@@ -238,4 +238,14 @@ enum WordMatchLibrary {
     static func defaultPool() -> [WordMatchPair] {
         ProcessInfo.processInfo.arguments.contains("UITestSmallWordSet") ? primerSet : all
     }
+
+    static func readingPracticePool() -> [WordMatchPair] {
+        let source = defaultPool()
+        let filtered = source.filter(isSuitableForReadAloud)
+        return filtered.isEmpty ? primerSet : filtered
+    }
+
+    private static func isSuitableForReadAloud(_ pair: WordMatchPair) -> Bool {
+        !pair.word.contains(" ") && !pair.word.contains("-")
+    }
 }

@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		008F367EB8F665705F62AC9A /* WordsTrainerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE18AB5710CF8C5D538E10F3 /* WordsTrainerScreen.swift */; };
+		11A1B2C3D4E5F60718293A01 /* ReadAloudSpeechRecognition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B1C2D3E4F5061728394A01 /* ReadAloudSpeechRecognition.swift */; };
+		11A1B2C3D4E5F60718293A02 /* ReadAloudTrainerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B1C2D3E4F5061728394A02 /* ReadAloudTrainerViewModel.swift */; };
+		11A1B2C3D4E5F60718293A03 /* ReadAloudTrainerScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B1C2D3E4F5061728394A03 /* ReadAloudTrainerScreen.swift */; };
+		11A1B2C3D4E5F60718293A04 /* ReadAloudTrainerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B1C2D3E4F5061728394A04 /* ReadAloudTrainerViewModelTests.swift */; };
 		082300BF588B0398E6BBC0E6 /* WordImages in Resources */ = {isa = PBXBuildFile; fileRef = 3CDCEFB06D37B22222A3AC2B /* WordImages */; };
 		1695356BE32A847CEEFC94E4 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 943A4A40E44322C06AA4C051 /* XCTest.framework */; };
 		398EECC9046734DB39C72701 /* ReadingTrainingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD3E5202F67BCB15549DD949 /* ReadingTrainingApp.swift */; };
@@ -58,6 +62,10 @@
 		184D509922CC8F2793E987F1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		1C8E7A46F2565262C2367A1C /* SyllableTrainerViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SyllableTrainerViewModelTests.swift; sourceTree = "<group>"; };
 		212D7293EB04175813D72C2F /* ReadingTrainingUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReadingTrainingUITests.swift; sourceTree = "<group>"; };
+		22B1C2D3E4F5061728394A01 /* ReadAloudSpeechRecognition.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReadAloudSpeechRecognition.swift; sourceTree = "<group>"; };
+		22B1C2D3E4F5061728394A02 /* ReadAloudTrainerViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReadAloudTrainerViewModel.swift; sourceTree = "<group>"; };
+		22B1C2D3E4F5061728394A03 /* ReadAloudTrainerScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReadAloudTrainerScreen.swift; sourceTree = "<group>"; };
+		22B1C2D3E4F5061728394A04 /* ReadAloudTrainerViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReadAloudTrainerViewModelTests.swift; sourceTree = "<group>"; };
 		2DAB3614DDE920AAD42BA77A /* LetterCaseMode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LetterCaseMode.swift; sourceTree = "<group>"; };
 		33313786FD17CA8C181EF5F0 /* WordMatchGameViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WordMatchGameViewModelTests.swift; sourceTree = "<group>"; };
 		37500526259D6F17E4C905E3 /* TrainerBackgroundView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TrainerBackgroundView.swift; sourceTree = "<group>"; };
@@ -148,6 +156,7 @@
 		5A94256B5C8778F450428158 /* ReadingTrainingTests */ = {
 			isa = PBXGroup;
 			children = (
+				22B1C2D3E4F5061728394A04 /* ReadAloudTrainerViewModelTests.swift */,
 				1C8E7A46F2565262C2367A1C /* SyllableTrainerViewModelTests.swift */,
 				33313786FD17CA8C181EF5F0 /* WordMatchGameViewModelTests.swift */,
 			);
@@ -160,6 +169,7 @@
 				8C300371629956D8265972CA /* ContentView.swift */,
 				3F1ACB7C8B635730FAFB9CE6 /* LetterPickerSheet.swift */,
 				0262B2CD9C834343817387A2 /* RandomChoiceButton.swift */,
+				22B1C2D3E4F5061728394A03 /* ReadAloudTrainerScreen.swift */,
 				F2974070DBB94DCCC97EDAC7 /* RootTabView.swift */,
 				6EDCF808DBC6FDA70D8724ED /* SyllablePreviewView.swift */,
 				37500526259D6F17E4C905E3 /* TrainerBackgroundView.swift */,
@@ -172,6 +182,8 @@
 		A30F051EF629AFEC8B24FD00 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				22B1C2D3E4F5061728394A01 /* ReadAloudSpeechRecognition.swift */,
+				22B1C2D3E4F5061728394A02 /* ReadAloudTrainerViewModel.swift */,
 				BBA23BC8E2E5EF04626DACCE /* SyllableTrainerViewModel.swift */,
 				C663EF4519346A188FE56D84 /* WordMatchGameViewModel.swift */,
 			);
@@ -362,6 +374,9 @@
 				CBC772F2B2C91DA751ADCC26 /* LetterPickerContext.swift in Sources */,
 				D39DDDD76EC2F00907151FD9 /* LetterPickerSheet.swift in Sources */,
 				8943A5676ED1F4DBFF4AF09A /* RandomChoiceButton.swift in Sources */,
+				11A1B2C3D4E5F60718293A01 /* ReadAloudSpeechRecognition.swift in Sources */,
+				11A1B2C3D4E5F60718293A03 /* ReadAloudTrainerScreen.swift in Sources */,
+				11A1B2C3D4E5F60718293A02 /* ReadAloudTrainerViewModel.swift in Sources */,
 				398EECC9046734DB39C72701 /* ReadingTrainingApp.swift in Sources */,
 				E04F1DCB444B4D10C5367215 /* RootTabView.swift in Sources */,
 				3B42E5C660667C7F1903FB6B /* RussianLetters.swift in Sources */,
@@ -380,6 +395,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				11A1B2C3D4E5F60718293A04 /* ReadAloudTrainerViewModelTests.swift in Sources */,
 				7ACFCC122EFA6DAF67C82455 /* SyllableTrainerViewModelTests.swift in Sources */,
 				62A44793E3A593E244BA31BD /* WordMatchGameViewModelTests.swift in Sources */,
 			);
@@ -415,6 +431,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Читаем слоги";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Микрофон нужен, чтобы ребенок мог прочитать слово вслух.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Распознавание речи нужно, чтобы проверить, правильно ли ребенок прочитал слово.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -476,6 +494,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Читаем слоги";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Микрофон нужен, чтобы ребенок мог прочитать слово вслух.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Распознавание речи нужно, чтобы проверить, правильно ли ребенок прочитал слово.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
