@@ -179,9 +179,13 @@ struct WordsTrainerScreen: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityElement(children: .ignore)
             .accessibilityIdentifier("words.action.alphabetical")
+            .accessibilityLabel("По алфавиту")
             .accessibilityValue(viewModel.isAlphabeticalRound ? "active" : "inactive")
-            .sheet(isPresented: $isParentGatePresented) {
+            .sheet(isPresented: $isParentGatePresented, onDismiss: {
+                parentGateChallenge = ParentGateChallenge.random()
+            }) {
                 ParentGateSheet(challenge: parentGateChallenge) {
                     viewModel.startRandomRound()
                 }
@@ -199,7 +203,9 @@ struct WordsTrainerScreen: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityElement(children: .ignore)
             .accessibilityIdentifier("words.action.restart")
+            .accessibilityLabel("Новый набор")
             .accessibilityValue(viewModel.isAlphabeticalRound ? "inactive" : "active")
         }
         .padding(.horizontal, 18)
@@ -234,7 +240,6 @@ struct WordsTrainerScreen: View {
 
     private func handleAlphabeticalButtonTap() {
         if viewModel.isAlphabeticalRound {
-            parentGateChallenge = ParentGateChallenge.random()
             isParentGatePresented = true
             return
         }
@@ -301,6 +306,7 @@ private struct ParentGateSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var answer = ""
     @State private var errorMessage: String?
+    @FocusState private var isAnswerFocused: Bool
 
     var body: some View {
         NavigationStack {
@@ -324,6 +330,7 @@ private struct ParentGateSheet: View {
 
                 TextField("Ответ", text: $answer)
                     .keyboardType(.numberPad)
+                    .focused($isAnswerFocused)
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 14)
@@ -370,6 +377,15 @@ private struct ParentGateSheet: View {
                         dismiss()
                     }
                     .accessibilityIdentifier("words.parentGate.cancel")
+                }
+
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+
+                    Button("Готово") {
+                        isAnswerFocused = false
+                    }
+                    .accessibilityIdentifier("words.parentGate.keyboardDone")
                 }
             }
         }

@@ -144,6 +144,7 @@ struct ReadAloudTrainerScreen: View {
             Text("Открыто: \(viewModel.completedCount) из \(viewModel.totalCount)")
                 .font(.system(size: compactHeight ? 16 : 17, weight: .black, design: .rounded))
                 .foregroundStyle(Color(red: 0.22, green: 0.30, blue: 0.38))
+                .accessibilityIdentifier("read.progress")
 
             Spacer(minLength: 0)
 

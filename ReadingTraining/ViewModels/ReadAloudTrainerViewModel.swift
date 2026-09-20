@@ -177,7 +177,7 @@ final class ReadAloudTrainerViewModel: ObservableObject {
             if isFinal {
                 stopListening(
                     statusMessage: retryMessage(for: text),
-                    clearTranscript: false
+                    clearTranscript: true
                 )
             }
         case let .failure(message):

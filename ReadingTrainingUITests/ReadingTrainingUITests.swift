@@ -15,68 +15,84 @@ final class ReadingTrainingUITests: XCTestCase {
 
     func testLaunchShowsDefaultSyllable() throws {
         let app = XCUIApplication()
+        app.launchArguments.append("UITestTabSyllables")
         app.launch()
 
-        let leftLetter = app.buttons["syllable.leftLetter"]
-        let rightLetter = app.buttons["syllable.rightLetter"]
+        openSyllablesTab(in: app)
 
-        XCTAssertTrue(leftLetter.waitForExistence(timeout: 2))
-        XCTAssertTrue(rightLetter.exists)
-        XCTAssertEqual(leftLetter.label, "М")
-        XCTAssertEqual(rightLetter.label, "А")
-        XCTAssertTrue(app.buttons["action.swap"].exists)
+        let leftLetter = waitForElement("syllable.leftLetter", in: app)
+        let rightLetter = waitForElement("syllable.rightLetter", in: app)
+
+        waitForLabel("М", element: leftLetter)
+        waitForLabel("А", element: rightLetter)
+        XCTAssertTrue(waitForElement("action.swap", in: app).exists)
     }
 
     func testSwapButtonChangesVisibleOrder() throws {
         let app = XCUIApplication()
+        app.launchArguments.append("UITestTabSyllables")
         app.launch()
 
-        app.buttons["action.swap"].tap()
+        openSyllablesTab(in: app)
 
-        XCTAssertEqual(app.buttons["syllable.leftLetter"].label, "А")
-        XCTAssertEqual(app.buttons["syllable.rightLetter"].label, "М")
+        waitForElement("action.swap", in: app).tap()
+
+        waitForLabel("А", element: waitForElement("syllable.leftLetter", in: app))
+        waitForLabel("М", element: waitForElement("syllable.rightLetter", in: app))
     }
 
     func testLetterPickerChangesLeftLetter() throws {
         let app = XCUIApplication()
+        app.launchArguments.append("UITestTabSyllables")
         app.launch()
 
-        app.buttons["syllable.leftLetter"].tap()
+        openSyllablesTab(in: app)
 
-        let pickerLetter = app.buttons["picker.letter.С"]
-        XCTAssertTrue(pickerLetter.waitForExistence(timeout: 2))
+        waitForElement("syllable.leftLetter", in: app).tap()
+
+        let pickerLetter = waitForElement("picker.letter.С", in: app)
+        XCTAssertTrue(pickerLetter.waitForExistence(timeout: 5))
 
         pickerLetter.tap()
 
-        XCTAssertEqual(app.buttons["syllable.leftLetter"].label, "С")
+        waitForLabel("С", element: waitForElement("syllable.leftLetter", in: app))
     }
 
     func testLowercaseModeAndRandomButtonUpdateVisibleLetter() throws {
         let app = XCUIApplication()
+        app.launchArguments.append("UITestTabSyllables")
         app.launch()
 
-        app.segmentedControls.buttons["абв"].tap()
+        openSyllablesTab(in: app)
 
-        let rightLetter = app.buttons["syllable.rightLetter"]
-        XCTAssertEqual(app.buttons["syllable.leftLetter"].label, "м")
-        XCTAssertEqual(rightLetter.label, "а")
+        let lowercaseButton = app
+            .descendants(matching: .segmentedControl)
+            .matching(identifier: "caseMode.picker")
+            .firstMatch
+            .buttons["абв"]
+        XCTAssertTrue(lowercaseButton.waitForExistence(timeout: 5))
+        lowercaseButton.tap()
+
+        let rightLetter = waitForElement("syllable.rightLetter", in: app)
+        waitForLabel("м", element: waitForElement("syllable.leftLetter", in: app))
+        waitForLabel("а", element: rightLetter)
 
         let previousLetter = rightLetter.label
-        app.buttons["action.random.right"].tap()
+        waitForElement("action.random.right", in: app).tap()
 
-        let newLetter = rightLetter.label
+        let newLetter = waitForDifferentLabel(from: previousLetter, element: rightLetter)
         XCTAssertNotEqual(newLetter, previousLetter)
         XCTAssertTrue(["а", "о", "у", "ы", "э", "я", "ё", "ю", "и", "е"].contains(newLetter))
     }
 
     func testWordsTabShowsGameAndCelebrationAfterCorrectMatches() throws {
         let app = XCUIApplication()
-        app.launchArguments.append("UITestSmallWordSet")
+        app.launchArguments += ["UITestSmallWordSet", "UITestTabWords"]
         app.launch()
 
-        app.tabBars.buttons["Слова"].tap()
+        openWordsTab(in: app)
 
-        XCTAssertTrue(app.buttons["words.word.beads"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.buttons["words.word.beads"].waitForExistence(timeout: 5))
 
         let pairs = ["beads", "bucket", "bread", "bag", "doll"]
         for key in pairs {
@@ -89,13 +105,12 @@ final class ReadingTrainingUITests: XCTestCase {
 
     func testAlphabeticalButtonSortsWordColumn() throws {
         let app = XCUIApplication()
-        app.launchArguments.append("UITestSmallWordSet")
+        app.launchArguments += ["UITestSmallWordSet", "UITestTabWords"]
         app.launch()
 
-        app.tabBars.buttons["Слова"].tap()
+        openWordsTab(in: app)
 
-        let alphabeticalButton = app.buttons["words.action.alphabetical"]
-        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
+        let alphabeticalButton = waitForElement("words.action.alphabetical", in: app)
         XCTAssertEqual(alphabeticalButton.value as? String, "active")
 
         let predicate = NSPredicate(format: "identifier BEGINSWITH %@", "words.word.")
@@ -108,18 +123,17 @@ final class ReadingTrainingUITests: XCTestCase {
 
     func testAlphabeticalModeStaysActiveAfterNewRound() throws {
         let app = XCUIApplication()
-        app.launchArguments.append("UITestSmallWordSet")
+        app.launchArguments += ["UITestSmallWordSet", "UITestTabWords"]
         app.launch()
 
-        app.tabBars.buttons["Слова"].tap()
+        openWordsTab(in: app)
 
-        let alphabeticalButton = app.buttons["words.action.alphabetical"]
-        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
+        let alphabeticalButton = waitForElement("words.action.alphabetical", in: app)
         XCTAssertEqual(alphabeticalButton.value as? String, "active")
 
-        app.buttons["words.action.restart"].tap()
+        waitForElement("words.action.restart", in: app).tap()
 
-        XCTAssertEqual(alphabeticalButton.value as? String, "active")
+        waitForValue("active", element: alphabeticalButton)
 
         let predicate = NSPredicate(format: "identifier BEGINSWITH %@", "words.word.")
         let wordButtons = app.buttons.matching(predicate)
@@ -129,13 +143,12 @@ final class ReadingTrainingUITests: XCTestCase {
 
     func testAlphabeticalModeStaysActiveAfterCelebrationPlayAgain() throws {
         let app = XCUIApplication()
-        app.launchArguments.append("UITestSmallWordSet")
+        app.launchArguments += ["UITestSmallWordSet", "UITestTabWords"]
         app.launch()
 
-        app.tabBars.buttons["Слова"].tap()
+        openWordsTab(in: app)
 
-        let alphabeticalButton = app.buttons["words.action.alphabetical"]
-        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
+        let alphabeticalButton = waitForElement("words.action.alphabetical", in: app)
 
         let pairs = ["bread", "beads", "bucket", "doll", "bag"]
         for key in pairs {
@@ -147,8 +160,8 @@ final class ReadingTrainingUITests: XCTestCase {
 
         app.buttons["words.celebration.playAgain"].tap()
 
-        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
-        XCTAssertEqual(alphabeticalButton.value as? String, "active")
+        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 5))
+        waitForValue("active", element: alphabeticalButton)
 
         let predicate = NSPredicate(format: "identifier BEGINSWITH %@", "words.word.")
         let wordButtons = app.buttons.matching(predicate)
@@ -158,15 +171,15 @@ final class ReadingTrainingUITests: XCTestCase {
 
     func testRepeatedTapOnConnectedPictureRemovesConnection() throws {
         let app = XCUIApplication()
-        app.launchArguments.append("UITestSmallWordSet")
+        app.launchArguments += ["UITestSmallWordSet", "UITestTabWords"]
         app.launch()
 
-        app.tabBars.buttons["Слова"].tap()
+        openWordsTab(in: app)
 
         let wordButton = app.buttons["words.word.beads"]
         let pictureButton = app.buttons["words.picture.bucket"]
 
-        XCTAssertTrue(wordButton.waitForExistence(timeout: 2))
+        XCTAssertTrue(wordButton.waitForExistence(timeout: 5))
         XCTAssertTrue(pictureButton.exists)
 
         wordButton.tap()
@@ -181,19 +194,19 @@ final class ReadingTrainingUITests: XCTestCase {
 
     func testErrorCounterResetsAfterSeventhMistake() throws {
         let app = XCUIApplication()
-        app.launchArguments.append("UITestSmallWordSet")
+        app.launchArguments += ["UITestSmallWordSet", "UITestTabWords"]
         app.launch()
 
-        app.tabBars.buttons["Слова"].tap()
+        openWordsTab(in: app)
 
         let counter = app.staticTexts["words.errorCounter"]
-        XCTAssertTrue(counter.waitForExistence(timeout: 2))
+        XCTAssertTrue(counter.waitForExistence(timeout: 5))
         XCTAssertEqual(counter.label, "Ошибки: 0 из 7")
 
         let wordButton = app.buttons["words.word.beads"]
         let pictureButton = app.buttons["words.picture.bucket"]
 
-        XCTAssertTrue(wordButton.waitForExistence(timeout: 2))
+        XCTAssertTrue(wordButton.waitForExistence(timeout: 5))
         XCTAssertTrue(pictureButton.exists)
 
         for attempt in 1..<7 {
@@ -210,13 +223,12 @@ final class ReadingTrainingUITests: XCTestCase {
 
     func testDisablingAlphabeticalModeRequiresParentGate() throws {
         let app = XCUIApplication()
-        app.launchArguments.append("UITestSmallWordSet")
+        app.launchArguments += ["UITestSmallWordSet", "UITestTabWords"]
         app.launch()
 
-        app.tabBars.buttons["Слова"].tap()
+        openWordsTab(in: app)
 
-        let alphabeticalButton = app.buttons["words.action.alphabetical"]
-        XCTAssertTrue(alphabeticalButton.waitForExistence(timeout: 2))
+        let alphabeticalButton = waitForElement("words.action.alphabetical", in: app)
         XCTAssertEqual(alphabeticalButton.value as? String, "active")
 
         alphabeticalButton.tap()
@@ -232,14 +244,19 @@ final class ReadingTrainingUITests: XCTestCase {
         answerField.tap()
         answerField.typeText(String(answer))
 
-        app.buttons["words.parentGate.submit"].tap()
+        let keyboardDoneButton = app.buttons["words.parentGate.keyboardDone"]
+        XCTAssertTrue(keyboardDoneButton.waitForExistence(timeout: 2))
+        keyboardDoneButton.tap()
 
-        waitForValue("inactive", element: alphabeticalButton)
+        app.buttons["words.parentGate.submit"].tap()
+        XCTAssertTrue(title.waitForNonExistence(timeout: 3))
+
+        waitForValue("inactive", element: waitForElement("words.action.alphabetical", in: app))
     }
 
     func testReadAloudTabShowsCelebrationAfterRecognizedWord() throws {
         let app = XCUIApplication()
-        app.launchArguments += ["UITestSmallWordSet", "UITestReadAloudAutoSuccess"]
+        app.launchArguments += ["UITestSmallWordSet", "UITestReadAloudAutoSuccess", "UITestTabReadAloud"]
         app.launch()
 
         app.tabBars.buttons["Прочитай"].tap()
@@ -253,16 +270,176 @@ final class ReadingTrainingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["read.celebration.continue"].exists)
     }
 
-    private func waitForLabel(_ label: String, element: XCUIElement) {
-        let predicate = NSPredicate(format: "label == %@", label)
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: 2), .completed)
+    func testReadAloudCompletingAllBoxesShowsRoundCelebration() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["UITestSmallWordSet", "UITestReadAloudAutoSuccess", "UITestTabReadAloud"]
+        app.launch()
+
+        openReadAloudTab(in: app)
+
+        let keys = ["beads", "bucket", "bread", "bag", "doll"]
+        for key in keys.dropLast() {
+            completeReadAloudBox(key, in: app)
+            XCTAssertTrue(app.buttons["read.celebration.continue"].waitForExistence(timeout: 2))
+            app.buttons["read.celebration.continue"].tap()
+        }
+
+        completeReadAloudBox(keys.last!, in: app)
+
+        XCTAssertTrue(app.staticTexts["read.roundCelebration.title"].waitForExistence(timeout: 3))
+        XCTAssertEqual(app.staticTexts["read.progress"].label, "Открыто: 5 из 5")
     }
 
-    private func waitForValue(_ value: String, element: XCUIElement) {
+    func testReadAloudPlayAgainResetsProgressCounter() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["UITestSmallWordSet", "UITestReadAloudAutoSuccess", "UITestTabReadAloud"]
+        app.launch()
+
+        openReadAloudTab(in: app)
+
+        let keys = ["beads", "bucket", "bread", "bag", "doll"]
+        for key in keys.dropLast() {
+            completeReadAloudBox(key, in: app)
+            app.buttons["read.celebration.continue"].tap()
+        }
+        completeReadAloudBox(keys.last!, in: app)
+
+        let playAgainButton = app.buttons["read.roundCelebration.playAgain"]
+        XCTAssertTrue(playAgainButton.waitForExistence(timeout: 3))
+        playAgainButton.tap()
+
+        let progress = app.staticTexts["read.progress"]
+        XCTAssertTrue(progress.waitForExistence(timeout: 2))
+        waitForLabel("Открыто: 0 из 5", element: progress)
+        XCTAssertFalse(app.staticTexts["read.roundCelebration.title"].exists)
+    }
+
+    func testReadAloudRestartButtonClearsOpenedProgress() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["UITestSmallWordSet", "UITestReadAloudAutoSuccess", "UITestTabReadAloud"]
+        app.launch()
+
+        openReadAloudTab(in: app)
+
+        completeReadAloudBox("beads", in: app)
+        XCTAssertTrue(app.buttons["read.celebration.continue"].waitForExistence(timeout: 2))
+        app.buttons["read.celebration.continue"].tap()
+
+        let progress = app.staticTexts["read.progress"]
+        XCTAssertTrue(progress.waitForExistence(timeout: 2))
+        waitForLabel("Открыто: 1 из 5", element: progress)
+
+        app.buttons["read.action.restart"].tap()
+
+        waitForLabel("Открыто: 0 из 5", element: progress)
+    }
+
+    private func waitForLabel(
+        _ label: String,
+        element: XCUIElement,
+        timeout: TimeInterval = 5
+    ) {
+        XCTAssertTrue(element.waitForExistence(timeout: timeout))
+        let predicate = NSPredicate(format: "label == %@", label)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
+        let result = XCTWaiter().wait(for: [expectation], timeout: timeout)
+
+        if result != .completed {
+            XCTFail("Expected label '\(label)', got '\(element.label)'")
+        }
+    }
+
+    private func waitForValue(
+        _ value: String,
+        element: XCUIElement,
+        timeout: TimeInterval = 5
+    ) {
+        XCTAssertTrue(element.waitForExistence(timeout: timeout))
         let predicate = NSPredicate(format: "value == %@", value)
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        XCTAssertEqual(XCTWaiter().wait(for: [expectation], timeout: 2), .completed)
+        let result = XCTWaiter().wait(for: [expectation], timeout: timeout)
+
+        if result != .completed {
+            XCTFail("Expected value '\(value)', got '\(String(describing: element.value))'")
+        }
+    }
+
+    private func waitForDifferentLabel(
+        from initialLabel: String,
+        element: XCUIElement,
+        timeout: TimeInterval = 5
+    ) -> String {
+        XCTAssertTrue(element.waitForExistence(timeout: timeout))
+        let predicate = NSPredicate(format: "label != %@", initialLabel)
+        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
+        let result = XCTWaiter().wait(for: [expectation], timeout: timeout)
+
+        if result != .completed {
+            XCTFail("Label did not change from '\(initialLabel)'")
+        }
+
+        return element.label
+    }
+
+    private func openSyllablesTab(in app: XCUIApplication) {
+        let swapButton = identifiedElement("action.swap", in: app)
+        let leftRandomButton = identifiedElement("action.random.left", in: app)
+
+        XCTAssertTrue(
+            waitForElements([swapButton, leftRandomButton], timeout: 10),
+            "Syllables screen did not become accessible after launch"
+        )
+    }
+
+    private func openWordsTab(in app: XCUIApplication) {
+        let alphabeticalButton = identifiedElement("words.action.alphabetical", in: app)
+        let restartButton = identifiedElement("words.action.restart", in: app)
+
+        XCTAssertTrue(
+            waitForElements([alphabeticalButton, restartButton], timeout: 10),
+            "Words screen did not become accessible after launch"
+        )
+    }
+
+    private func identifiedElement(_ identifier: String, in app: XCUIApplication) -> XCUIElement {
+        return app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+
+    private func waitForElement(
+        _ identifier: String,
+        in app: XCUIApplication,
+        timeout: TimeInterval = 5
+    ) -> XCUIElement {
+        let element = identifiedElement(identifier, in: app)
+        XCTAssertTrue(element.waitForExistence(timeout: timeout))
+        return element
+    }
+
+    private func waitForElements(
+        _ elements: [XCUIElement],
+        timeout: TimeInterval
+    ) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+
+        while Date() < deadline {
+            if elements.allSatisfy(\.exists) {
+                return true
+            }
+
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+
+        return elements.allSatisfy(\.exists)
+    }
+
+    private func openReadAloudTab(in app: XCUIApplication) {
+        XCTAssertTrue(app.buttons["read.box.beads"].waitForExistence(timeout: 10))
+    }
+
+    private func completeReadAloudBox(_ key: String, in app: XCUIApplication) {
+        let box = app.buttons["read.box.\(key)"]
+        XCTAssertTrue(box.waitForExistence(timeout: 2))
+        box.tap()
     }
 
     private func squareRootFromChallenge(_ challenge: String) -> Int {

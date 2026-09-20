@@ -47,7 +47,6 @@ struct SyllablePreviewView: View {
                 .fill(.white.opacity(0.82))
         )
         .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
-        .accessibilityIdentifier("syllable.preview")
     }
 
     private func letterButton(
@@ -63,10 +62,14 @@ struct SyllablePreviewView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.36)
                 .padding(.horizontal, 2)
-                .contentShape(Rectangle())
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .buttonStyle(.plain)
+        .contentShape(Rectangle())
+        .accessibilityElement(children: .ignore)
         .accessibilityIdentifier(accessibilityIdentifier)
         .accessibilityLabel(letter)
+        .accessibilityValue(kind == .consonant ? "consonant" : "vowel")
+        .accessibilityAddTraits(.isButton)
     }
 }
