@@ -245,6 +245,17 @@ enum WordMatchLibrary {
         return filtered.isEmpty ? primerSet : filtered
     }
 
+    static func wordBuildingPool() -> [WordMatchPair] {
+        let source = defaultPool()
+        let alphabet = Set(RussianLetters.alphabet)
+        let filtered = source.filter { pair in
+            !pair.word.isEmpty
+                && pair.word.count <= 12
+                && pair.word.allSatisfy { alphabet.contains(String($0)) }
+        }
+        return filtered.isEmpty ? primerSet : filtered
+    }
+
     private static func isSuitableForReadAloud(_ pair: WordMatchPair) -> Bool {
         !pair.word.contains(" ") && !pair.word.contains("-")
     }

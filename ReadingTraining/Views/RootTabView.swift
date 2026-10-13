@@ -5,6 +5,7 @@ struct RootTabView: View {
         case syllables
         case words
         case readAloud
+        case wordBuilder
     }
 
     @State private var selectedTab: Tab
@@ -17,6 +18,8 @@ struct RootTabView: View {
             initialTab = .words
         } else if arguments.contains("UITestTabReadAloud") {
             initialTab = .readAloud
+        } else if arguments.contains("UITestTabWordBuilder") {
+            initialTab = .wordBuilder
         } else {
             initialTab = .syllables
         }
@@ -43,6 +46,12 @@ struct RootTabView: View {
                     Label("Прочитай", systemImage: "gift.fill")
                 }
                 .tag(Tab.readAloud)
+
+            WordBuilderScreen()
+                .tabItem {
+                    Label("Составь слово", systemImage: "square.grid.3x3.fill")
+                }
+                .tag(Tab.wordBuilder)
         }
         .tint(Color(red: 0.18, green: 0.48, blue: 0.78))
     }
