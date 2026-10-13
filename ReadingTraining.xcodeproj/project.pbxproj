@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C10000000000000000000001 /* VowelFinderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000001 /* VowelFinderViewModel.swift */; };
+		C10000000000000000000002 /* VowelFinderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000002 /* VowelFinderScreen.swift */; };
+		C10000000000000000000003 /* VowelFinderViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000003 /* VowelFinderViewModelTests.swift */; };
+		B10000000000000000000001 /* ExerciseMenuViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001 /* ExerciseMenuViews.swift */; };
 		A10000000000000000000001 /* WordBuilderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* WordBuilderViewModel.swift */; };
 		A10000000000000000000002 /* WordBuilderScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* WordBuilderScreen.swift */; };
 		A10000000000000000000004 /* WordBuilderViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* WordBuilderViewModelTests.swift */; };
@@ -61,6 +65,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C20000000000000000000001 /* VowelFinderViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VowelFinderViewModel.swift; sourceTree = "<group>"; };
+		C20000000000000000000002 /* VowelFinderScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VowelFinderScreen.swift; sourceTree = "<group>"; };
+		C20000000000000000000003 /* VowelFinderViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VowelFinderViewModelTests.swift; sourceTree = "<group>"; };
+		B20000000000000000000001 /* ExerciseMenuViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExerciseMenuViews.swift; sourceTree = "<group>"; };
 		A20000000000000000000001 /* WordBuilderViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WordBuilderViewModel.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* WordBuilderScreen.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WordBuilderScreen.swift; sourceTree = "<group>"; };
 		A20000000000000000000004 /* WordBuilderViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WordBuilderViewModelTests.swift; sourceTree = "<group>"; };
@@ -162,6 +170,7 @@
 		5A94256B5C8778F450428158 /* ReadingTrainingTests */ = {
 			isa = PBXGroup;
 			children = (
+				C20000000000000000000003 /* VowelFinderViewModelTests.swift */,
 				A20000000000000000000004 /* WordBuilderViewModelTests.swift */,
 				22B1C2D3E4F5061728394A04 /* ReadAloudTrainerViewModelTests.swift */,
 				1C8E7A46F2565262C2367A1C /* SyllableTrainerViewModelTests.swift */,
@@ -173,6 +182,8 @@
 		9F2B8578FFF96E8B0DE21FF0 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				C20000000000000000000002 /* VowelFinderScreen.swift */,
+				B20000000000000000000001 /* ExerciseMenuViews.swift */,
 				A20000000000000000000002 /* WordBuilderScreen.swift */,
 				8C300371629956D8265972CA /* ContentView.swift */,
 				3F1ACB7C8B635730FAFB9CE6 /* LetterPickerSheet.swift */,
@@ -190,6 +201,7 @@
 		A30F051EF629AFEC8B24FD00 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				C20000000000000000000001 /* VowelFinderViewModel.swift */,
 				A20000000000000000000001 /* WordBuilderViewModel.swift */,
 				22B1C2D3E4F5061728394A01 /* ReadAloudSpeechRecognition.swift */,
 				22B1C2D3E4F5061728394A02 /* ReadAloudTrainerViewModel.swift */,
@@ -377,6 +389,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C10000000000000000000001 /* VowelFinderViewModel.swift in Sources */,
+				C10000000000000000000002 /* VowelFinderScreen.swift in Sources */,
+				B10000000000000000000001 /* ExerciseMenuViews.swift in Sources */,
 				A10000000000000000000001 /* WordBuilderViewModel.swift in Sources */,
 				A10000000000000000000002 /* WordBuilderScreen.swift in Sources */,
 				41DE5F91BBB4DE25E6EE24B8 /* ContentView.swift in Sources */,
@@ -406,6 +421,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C10000000000000000000003 /* VowelFinderViewModelTests.swift in Sources */,
 				A10000000000000000000004 /* WordBuilderViewModelTests.swift in Sources */,
 				11A1B2C3D4E5F60718293A04 /* ReadAloudTrainerViewModelTests.swift in Sources */,
 				7ACFCC122EFA6DAF67C82455 /* SyllableTrainerViewModelTests.swift in Sources */,

@@ -69,7 +69,10 @@ struct WordBuilderScreen: View {
         let count = viewModel.letters.count
         let columnsCount = count > 8 ? Int(ceil(Double(count) / 2.0)) : count
         let spacing: CGFloat = compact ? 5 : 7
-        let calculatedWidth = (availableWidth - 24 - CGFloat(max(columnsCount - 1, 0)) * spacing) / CGFloat(max(columnsCount, 1))
+        let calculatedWidth = max(
+            1,
+            (availableWidth - 24 - CGFloat(max(columnsCount - 1, 0)) * spacing) / CGFloat(max(columnsCount, 1))
+        )
         let slotSize = min(compact ? 48 : 54, calculatedWidth)
         let rowCount = Int(ceil(Double(count) / Double(max(columnsCount, 1))))
 
@@ -115,7 +118,7 @@ struct WordBuilderScreen: View {
         let spacing: CGFloat = compact ? 6 : 8
         let tileSize = min(
             compact ? 42 : 46,
-            (availableWidth - CGFloat(columnsCount - 1) * spacing) / CGFloat(columnsCount)
+            max(1, (availableWidth - CGFloat(columnsCount - 1) * spacing) / CGFloat(columnsCount))
         )
         let rowCount = Int(ceil(Double(viewModel.availableLetters.count) / Double(columnsCount)))
 

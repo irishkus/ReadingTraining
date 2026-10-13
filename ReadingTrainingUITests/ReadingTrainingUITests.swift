@@ -13,6 +13,67 @@ final class ReadingTrainingUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    func testReadingMenuOpensSyllablesExercise() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        XCTAssertTrue(waitForElement("menu.reading.syllables", in: app).exists)
+        XCTAssertTrue(waitForElement("menu.reading.words", in: app).exists)
+        XCTAssertTrue(waitForElement("menu.reading.readAloud", in: app).exists)
+
+        waitForElement("menu.reading.syllables", in: app).tap()
+
+        XCTAssertTrue(waitForElement("action.swap", in: app, timeout: 10).exists)
+        waitForElement("navigation.back", in: app).tap()
+        XCTAssertTrue(waitForElement("menu.reading.syllables", in: app).exists)
+    }
+
+    func testRussianMenuOpensWordBuilderExercise() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let russianTab = app.tabBars.buttons["Русский"]
+        XCTAssertTrue(russianTab.waitForExistence(timeout: 5))
+        russianTab.tap()
+
+        waitForElement("menu.russian.wordBuilder", in: app).tap()
+
+        XCTAssertTrue(waitForElement("wordBuilder.action.refresh", in: app, timeout: 10).exists)
+    }
+
+    func testRussianMenuOpensVowelsExercise() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let russianTab = app.tabBars.buttons["Русский"]
+        XCTAssertTrue(russianTab.waitForExistence(timeout: 5))
+        russianTab.tap()
+
+        XCTAssertTrue(waitForElement("menu.russian.wordBuilder", in: app).exists)
+        waitForElement("menu.russian.vowels", in: app).tap()
+
+        XCTAssertTrue(waitForElement("vowels.action.check", in: app, timeout: 10).exists)
+        XCTAssertTrue(waitForElement("vowels.action.refresh", in: app).exists)
+    }
+
+    func testVowelsExerciseConfirmsCorrectLetters() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["UITestSmallWordSet", "UITestDeterministicVowels", "UITestTabVowels"]
+        app.launch()
+
+        waitForElement("vowels.letter.1", in: app, timeout: 10).tap()
+        waitForValue("Выбрано", element: waitForElement("vowels.letter.1", in: app))
+
+        waitForElement("vowels.letter.3", in: app).tap()
+        waitForValue("Выбрано", element: waitForElement("vowels.letter.3", in: app))
+
+        waitForElement("vowels.action.check", in: app).tap()
+
+        waitForValue("Гласная", element: waitForElement("vowels.letter.1", in: app))
+        waitForValue("Гласная", element: waitForElement("vowels.letter.3", in: app))
+        XCTAssertTrue(waitForElement("vowels.celebration.title", in: app).exists)
+    }
+
     func testLaunchShowsDefaultSyllable() throws {
         let app = XCUIApplication()
         app.launchArguments.append("UITestTabSyllables")
